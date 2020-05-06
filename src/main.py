@@ -8,8 +8,8 @@ import time
 def from_xml_to_csv(url):
     root = ElementTree.fromstring(requests.get(url).content)
     file_name = url.rsplit('/', 1)[1].split('.')[0] + '_' + str(time.time()) + '.csv'
-    f = open(file_name, 'w', newline='', encoding='utf-8-sig')
-    csvwriter = csv.writer(f, delimiter=';')
+    f = open('reports/' + file_name, 'w', newline='', encoding='utf-8-sig')
+    csvwriter = csv.writer(f, delimiter=';', dialect='excel')
 
     col_names = ['id', 'group id', 'available', 'typePrefix', 'vendor', 'model', 'name', 'category', 'price',
                  'oldprice', 'currencyId', 'url', 'vendorcode', 'picture', 'description', 'country_of_origin',
@@ -45,17 +45,18 @@ def from_xml_to_csv(url):
         data['adult'] = offer.findtext('adult')
         data['bid'] = offer.attrib.get('bid')
         cond = offer.find('condition')
-        condition_type = cond.attrib.get('type') if cond else ''
+        condition_type = cond.attrib.get('type') if cond is not None else ''
         data['condition-type'] = condition_type
         data['condition-reason'] = offer.findtext('condition/reason')
         credit_template = offer.find('credit-template')
-        temp = credit_template.attrib.get('id') if credit_template else ''
+        temp = credit_template.attrib.get('id') if credit_template is not None else ''
         data['credit-template-id'] = temp
         data['dimensions'] = offer.findtext('dimensions')
         data['expiry'] = offer.findtext('expiry')
         data['weight'] = offer.findtext('weight')
         for param in offer.iter('param'):
-            field_name = param.attrib.get('name') + str(param.attrib.get('unit'))
+            field_name = param.attrib.get('name') if param.attrib.get('unit') is None \
+                else param.attrib.get('name') + str(param.attrib.get('unit'))
             data[field_name] = param.text
 
         csvwriter.writerow(data.values())
@@ -66,7 +67,8 @@ def from_xml_to_csv(url):
 def update_col_names_with_params(root, col_names):
     for offer in root.iter('offer'):
         for param in offer.iter('param'):
-            field_name = param.attrib.get('name') + str(param.attrib.get('unit'))
+            field_name = param.attrib.get('name') if param.attrib.get('unit') is None \
+                else param.attrib.get('name') + str(param.attrib.get('unit'))
             if field_name not in col_names:
                 col_names.append(field_name)
 
