@@ -11,11 +11,20 @@ def from_xml_to_csv(url):
     f = open('reports/' + file_name, 'w', newline='', encoding='utf-8-sig')
     csvwriter = csv.writer(f, delimiter=';', dialect='excel')
 
+    if root.tag == 'yml_catalog':
+        parse_yml(root, csvwriter)
+    else:
+        parse_gml(root, csvwriter)
+
+    f.close()
+
+
+def parse_yml(root, csvwriter):
     col_names = ['id', 'group id', 'available', 'typePrefix', 'vendor', 'model', 'name', 'category', 'price',
                  'oldprice', 'currencyId', 'url', 'vendorcode', 'picture', 'description', 'country_of_origin',
                  'manufacturer_warranty', 'sales_notes', 'pickup', 'store', 'delivery', 'barcode', 'adult', 'bid',
                  'condition-type', 'condition-reason', 'credit-template-id', 'dimensions', 'expiry', 'weight']
-    update_col_names_with_params(root, col_names)
+    update_yml_col_names_with_params(root, col_names)
     csvwriter.writerow(col_names)
 
     for offer in root.iter('offer'):
@@ -61,16 +70,34 @@ def from_xml_to_csv(url):
 
         csvwriter.writerow(data.values())
 
-    f.close()
+
+def parse_gml(root, csvwriter):
+    col_names = []
+    update_gml_col_names(root, csvwriter, col_names)
+    for item in root.findall('./channel/item'):
+        data = dict.fromkeys(col_names)
+        for elem in item.iterfind('./*'):
+            elem_name = elem.tag.split('}')[1]
+            data[elem_name] = elem.text
+        csvwriter.writerow(data.values())
 
 
-def update_col_names_with_params(root, col_names):
+def update_yml_col_names_with_params(root, col_names):
     for offer in root.iter('offer'):
         for param in offer.iter('param'):
             field_name = param.attrib.get('name') if param.attrib.get('unit') is None \
                 else param.attrib.get('name') + str(param.attrib.get('unit'))
             if field_name not in col_names:
                 col_names.append(field_name)
+
+
+def update_gml_col_names(root, csvwriter, col_names):
+    for item in root.findall('./channel/item'):
+        for elem in item.iterfind('./*'):
+            elem_name = elem.tag.split('}')[1]
+            if elem_name not in col_names:
+                col_names.append(elem_name)
+    csvwriter.writerow(col_names)
 
 
 
