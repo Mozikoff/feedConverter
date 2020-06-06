@@ -77,7 +77,7 @@ def parse_gml(root, csvwriter):
     for item in root.findall('./channel/item'):
         data = dict.fromkeys(col_names)
         for elem in item.iterfind('./*'):
-            elem_name = elem.tag.split('}')[1]
+            elem_name = elem.tag.split('}')[1] if '}' in elem.tag else elem.tag
             data[elem_name] = elem.text
         csvwriter.writerow(data.values())
 
@@ -94,7 +94,7 @@ def update_yml_col_names_with_params(root, col_names):
 def update_gml_col_names(root, csvwriter, col_names):
     for item in root.findall('./channel/item'):
         for elem in item.iterfind('./*'):
-            elem_name = elem.tag.split('}')[1]
+            elem_name = elem.tag.split('}')[1] if '}' in elem.tag else elem.tag
             if elem_name not in col_names:
                 col_names.append(elem_name)
     csvwriter.writerow(col_names)
