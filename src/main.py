@@ -43,7 +43,7 @@ def parse_yml(root, csvwriter):
         data['url'] = offer.findtext('url')
         data['vendorcode'] = offer.findtext('vendorCode')
         data['picture'] = get_offer_pictures(offer)
-        data['description'] = offer.findtext('description')
+        data['description'] = offer.findtext('description').replace("\n", "|")
         data['country_of_origin'] = offer.findtext('country_of_origin')
         data['manufacturer_warranty'] = offer.findtext('manufacturer_warranty')
         data['sales_notes'] = offer.findtext('sales_notes')
@@ -78,7 +78,7 @@ def parse_gml(root, csvwriter):
         data = dict.fromkeys(col_names)
         for elem in item.iterfind('./*'):
             elem_name = elem.tag.split('}')[1] if '}' in elem.tag else elem.tag
-            data[elem_name] = elem.text
+            data[elem_name] = elem.text.replace("\n", "|")
         csvwriter.writerow(data.values())
 
 
