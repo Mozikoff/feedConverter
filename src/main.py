@@ -43,7 +43,7 @@ def parse_yml(root, csvwriter):
         data['url'] = offer.findtext('url')
         data['vendorcode'] = offer.findtext('vendorCode')
         data['picture'] = get_offer_pictures(offer)
-        data['description'] = offer.findtext('description').replace("\n", "|")
+        data['description'] = offer.findtext('description', "").replace("\n", "|")
         data['country_of_origin'] = offer.findtext('country_of_origin')
         data['manufacturer_warranty'] = offer.findtext('manufacturer_warranty')
         data['sales_notes'] = offer.findtext('sales_notes')
@@ -60,13 +60,13 @@ def parse_yml(root, csvwriter):
         credit_template = offer.find('credit-template')
         temp = credit_template.attrib.get('id') if credit_template is not None else ''
         data['credit-template-id'] = temp
-        data['dimensions'] = offer.findtext('dimensions')
+        data['dimensions'] = offer.findtext('dimensions', "").replace("\n", "|")
         data['expiry'] = offer.findtext('expiry')
         data['weight'] = offer.findtext('weight')
         for param in offer.iter('param'):
             field_name = param.attrib.get('name') if param.attrib.get('unit') is None \
                 else param.attrib.get('name') + str(param.attrib.get('unit'))
-            data[field_name] = param.text
+            data[field_name] = param.text.replace("\n", "|")
 
         csvwriter.writerow(data.values())
 
