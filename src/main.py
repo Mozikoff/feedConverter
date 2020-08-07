@@ -20,7 +20,7 @@ def from_xml_to_csv(url):
 
 
 def parse_yml(root, csvwriter):
-    col_names = ['id', 'group id', 'available', 'typePrefix', 'vendor', 'model', 'name', 'category', 'price',
+    col_names = ['id', 'group_id', 'available', 'typePrefix', 'vendor', 'model', 'name', 'category', 'price',
                  'oldprice', 'currencyId', 'url', 'vendorcode', 'picture', 'description', 'country_of_origin',
                  'manufacturer_warranty', 'sales_notes', 'pickup', 'store', 'delivery', 'barcode', 'adult', 'bid',
                  'condition-type', 'condition-reason', 'credit-template-id', 'dimensions', 'expiry', 'weight']
@@ -66,7 +66,7 @@ def parse_yml(root, csvwriter):
         for param in offer.iter('param'):
             field_name = param.attrib.get('name') if param.attrib.get('unit') is None \
                 else param.attrib.get('name') + str(param.attrib.get('unit'))
-            data[field_name] = param.text.replace("\n", "|")
+            data[field_name] = param.text.replace("\n", "|") if param.text is not None else ''
 
         csvwriter.writerow(data.values())
 
